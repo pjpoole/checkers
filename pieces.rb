@@ -8,28 +8,33 @@ class Piece
   # => @promoted pieces can move/jump using DIFFS
   # Thus:
   # => Iterating over DIFFS[]
-  DIFFS = [
-    [ 2, 2],
-    [-2, 2],
-    [ 1, 1],
-    [-1, 1],
-    [ 1,-1],
-    [-1,-1],
-    [ 2,-2],
-    [-2,-2],
-  ]
+  # DIFFS = [
+  #   [ 2, 2],
+  #   [-2, 2],
+  #   [ 1, 1],
+  #   [-1, 1],
+  #   [ 1,-1],
+  #   [-1,-1],
+  #   [ 2,-2],
+  #   [-2,-2],
+  # ]
 
   def initialize(board, pos, color)
     @board, @pos, @color = board, pos, color
 
     @promoted = false
+
+    diffs = [[1,1],[-1,1]]
+
+    @move_diffs = diffs.map { |x, y| [x, y * COLOR[@color]] }
+    @jump_diffs = diffs.map { |x, y| [x * 2, y * 2 * COLOR[@color]] }
   end
 
   def perform_slide(diff)
     return false unless move_diffs.include?(diff)
 
     @pos = position_sum(@pos, diff
-    
+
   end
 
   def perform_jump
