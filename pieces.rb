@@ -1,6 +1,6 @@
 class Piece
   COLOR = { w: 1, b: -1 }
-  # Okay, so:
+  # Okay, so, apparently ruby slicers don't work like python slicers.
   # => White can *jump* using DIFFS[0..1]
   # => White can *move* using DIFFS[2..3]
   # => Black can *move* using DIFFS[4..5]
@@ -25,16 +25,26 @@ class Piece
     @promoted = false
   end
 
-  def perform_slide
+  def perform_slide(diff)
+    return false unless move_diffs.include?(diff)
+
+    @pos = position_sum(@pos, diff
     
   end
 
   def perform_jump
+    return false unless move_diffs.include?(diff)
 
+    @pos = position_sum(@pos, diff)
+    @board
   end
 
   def move_diffs
 
+  end
+
+  def position_sum(pos, diff)
+    pos.zip(diff).map { |coord1, coord2| coord1 + coord2 }
   end
 
   def maybe_promote
