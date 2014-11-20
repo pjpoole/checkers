@@ -5,6 +5,7 @@ class Piece
   # "white" moves from 0 toward (size - 1) (sense +1)
   # "black" moves from (size - 1) toward 0 (sense -1)
   COLORS = { w: 1, b: -1 }
+  MOVES = { l: 0, r: 1, bl: 2, br: 3 }
 
   attr_reader :pos, :color
 
@@ -42,7 +43,9 @@ class Piece
   # Moving
   # TODO: Just implement four-way movement for pieces (l, r, bl, br)
   # F*ck moving by co-ords or diffs.
-  def perform_moves(move_sequence)
+  def perform_moves(sym_move_sequence)
+    move_sequence = to_diffs(sym_move_sequence)
+
     if valid_move_sequence?(move_sequence)
       perform_moves!(move_sequence)
     else
@@ -121,6 +124,10 @@ class Piece
   end
 
   # Helpers
+  def to_diffs(sym_move_sequence)
+    sym_move_sequence.map { |sym| MOVES[sym] }
+  end
+
   def move_diffs
     moves = []
 
