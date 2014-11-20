@@ -43,7 +43,11 @@ class Piece
   # TODO: Just implement four-way movement for pieces (l, r, bl, br)
   # F*ck moving by co-ords or diffs.
   def perform_moves(move_sequence)
-
+    if valid_move_sequence?(move_sequence)
+      perform_moves!(move_sequence)
+    else
+      raise InvalidMoveError
+    end
   end
 
   protected
@@ -53,6 +57,14 @@ class Piece
 
   def valid_move_seq?(move_sequence)
     board_dup = @board.dup
+
+    begin
+      board_dup.perform_moves!(move_sequence)
+    rescue InvalidMoveError
+      return false
+    end
+
+    true
   end
 
   # Moving
