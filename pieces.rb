@@ -21,28 +21,25 @@ class Piece
   end
 
   def perform_slide(diff)
-    return false unless move_diffs.include?(diff)
+    return false unless @diffs.include?(diff)
 
     end_pos = position_sum(@pos, diff)
-    @board[start_pos], @board[@pos] = nil, self
+    @board[@pos], @board[end_pos] = nil, self
+
     @pos = end_pos
   end
 
   def perform_jump(diff)
-    return false unless move_diffs.include?(diff)
+    return false unless @diffs.include?(diff)
 
     end_pos = position_sum(@pos, diff)
-    @board[start_pos], @board[@pos] = nil, self
+    @board[@pos], @board[end_pos] = nil, self
     @board[position_sum(@pos, diff.map { |coord| coord / 2 } )] = nil
 
     @pos = end_pos
   end
 
   private
-  def move_diffs
-
-  end
-
   def position_sum(pos, diff)
     pos.zip(diff).map { |coord1, coord2| coord1 + coord2 }
   end

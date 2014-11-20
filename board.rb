@@ -6,6 +6,7 @@ class Board
   # more of this logic is contained in pieces.rb
   COLORS = { w: 1, b: -1 }
 
+  attr_accessor :board
   attr_reader :size
 
   def initialize(size = 8, clean_board = false)
