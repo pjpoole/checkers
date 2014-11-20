@@ -1,43 +1,29 @@
 class Piece
-  COLOR = { w: 1, b: -1 }
+  COLORS = { w: 1, b: -1 }
   # Okay, so, apparently ruby slicers don't work like python slicers.
-  # => White can *jump* using DIFFS[0..1]
-  # => White can *move* using DIFFS[2..3]
-  # => Black can *move* using DIFFS[4..5]
-  # => Black can *jump* using DIFFS[6..7]
-  # => @promoted pieces can move/jump using DIFFS
-  # Thus:
-  # => Iterating over DIFFS[]
-  # DIFFS = [
-  #   [ 2, 2],
-  #   [-2, 2],
-  #   [ 1, 1],
-  #   [-1, 1],
-  #   [ 1,-1],
-  #   [-1,-1],
-  #   [ 2,-2],
-  #   [-2,-2],
-  # ]
+  # This is a constant because we'll be manipulating it a couple places.
+  # Only works for American and International Checkers, probably.
+  DIFFS = [[1,1],[-1,1]]
 
   def initialize(board, pos, color)
     @board, @pos, @color = board, pos, color
+    @board[pos] = self
 
     @promoted = false
 
-    diffs = [[1,1],[-1,1]]
-
-    @move_diffs = diffs.map { |x, y| [x, y * COLOR[@color]] }
-    @jump_diffs = diffs.map { |x, y| [x * 2, y * 2 * COLOR[@color]] }
+    move_diffs = DIFFS.map { |x, y| [x, y * COLORS[@color]] }
+    jump_diffs = DIFFS.map { |x, y| [x * 2, y * 2 * COLORS[@color]] }
+    @diffs = move_diffs + jump_diffs
   end
 
   def perform_slide(diff)
     return false unless move_diffs.include?(diff)
 
-    @pos = position_sum(@pos, diff
+    @pos = position_sum(@pos, diff)
 
   end
 
-  def perform_jump
+  def perform_jump(diff)
     return false unless move_diffs.include?(diff)
 
     @pos = position_sum(@pos, diff)

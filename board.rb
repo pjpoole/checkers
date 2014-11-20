@@ -1,4 +1,4 @@
-require_relative 'piece.rb'
+require_relative 'pieces.rb'
 
 class Board
   # "white" moves from 0 toward size - 1 (sense +1)
@@ -17,7 +17,6 @@ class Board
     # => Thus: x_x_x_x_ would be a back row
     COLORS.each_key { |color| populate(color) } unless clean_board == true
 
-    end
   end
 
   def [](pos)
@@ -25,19 +24,18 @@ class Board
     @board[y][x]
   end
 
-  def []=(pos)
+  def []=(pos, piece)
     x, y = pos
     @board[y][x] = pos
   end
 
   def render
     rendering = ""
-
     @board.each_with_index do |row, i|
 
       rendering << "#{i + 1}"
       row.each do |el| # is a piece or an empty cell
-        rendering << el.nil? ? "  " : "0 "
+        rendering << (el.nil? ? "  " : "0 ")
       end
       rendering << "\n"
     end
@@ -47,17 +45,19 @@ class Board
 
   private
   def populate(color)
-    start -= color == :w ? @size : 1
-    sense  = color == :w ? 1 : -1
+    start = (color == :w ? 0 : @size - 1)
+    sense = (color == :w ? 1 : -1)
 
     3.times do |dy|
       (@size / 2).times do |dx|
-        y, x = [start + dy, dy % 2 + dx * 2].map { |el| el * sense }
+        y, x = [start + (dy * sense), (dy % 2 + dx * 2) * sense]
         Piece.new(self, [x,y], color)
       end
     end
+
   end
-end
+
+end # end of class Board
 
 if $PROGRAM_NAME == __FILE__
   board = Board.new
