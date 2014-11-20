@@ -1,23 +1,21 @@
 require_relative 'pieces.rb'
 
 class Board
-  # "white" moves from 0 toward size - 1 (sense +1)
-  # "black" moves from size - 1 toward 0 (sense -1)
-  # more of this logic is contained in pieces.rb
   COLORS = { w: 1, b: -1 }
 
   attr_accessor :board
   attr_reader :size
 
   def initialize(size = 8, clean_board = false)
-    @size = size # should be even!
+    # size should be even! There are no rulesets for odd-sized checkers boards.
+    # Behavior with an odd-sized board is undefined.
+    @size = size
     @board = Array.new(@size) { Array.new(@size) }
 
     # Note: player's rightmost square is light
     # => only dark squares are occupied
     # => Thus: x_x_x_x_ would be a back row
     COLORS.each_key { |color| populate(color) } unless clean_board == true
-
   end
 
   def [](pos)
@@ -32,13 +30,13 @@ class Board
 
   def render
     rendering = ""
-    @board.each_with_index do |col, y|
-      col_flipped = col.reverse
-      y_flipped = @size - y
-      rendering << "#{y_flipped}"
 
-      col_flipped.each_with_index do |el, x| # is a piece or an empty cell
-        rendering << (el.nil? ? "  " : (@board[y_flipped - 1][x]).to_s)
+    (@board.count - 1).downto(0) do |x|
+      rendering << (x + 1).to_s
+
+      @size.times do |y|
+        el = @board[x][y]
+        rendering << (el.nil? ? "  " : el.to_s.concat(" "))
       end
 
       rendering << "\n"
@@ -47,12 +45,18 @@ class Board
     rendering += " 1 2 3 4 5 6 7 8 \n"
   end
 
+  def count_pieces # debug method
+    puts @board.flatten.compact.tap { |x| x.each { |el| p el } }.count
+  end
+
   private
   def populate(color)
     start = (color == :w ? 0 : @size - 1)
     sense = COLORS[color]
 
-    3.times do |dy|
+    # Populate all but the center two rows.
+    # Typical of most checkers variants.
+    (size / 2 - 1).times do |dy|
       (@size / 2).times do |dx|
         y = start + (dy * sense)
         x = y % 2 + dx * 2
