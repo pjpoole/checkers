@@ -49,13 +49,12 @@ class Board
   private
   def populate(color)
     start = (color == :w ? 0 : @size - 1)
-    sense = (color == :w ? 1 : -1)
+    sense = COLORS[color]
 
     3.times do |dy|
       (@size / 2).times do |dx|
         y = start + (dy * sense)
         x = y % 2 + dx * 2
-        # x = [(y % 2)]
         Piece.new(self, [x,y], color)
       end
     end
