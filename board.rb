@@ -26,17 +26,20 @@ class Board
 
   def []=(pos, piece)
     x, y = pos
-    @board[y][x] = pos
+    @board[y][x] = piece
   end
 
   def render
     rendering = ""
-    @board.each_with_index do |row, i|
+    @board.each_with_index do |col, y|
+      col_flipped = col.reverse
+      y_flipped = @size - y
+      rendering << "#{y_flipped}"
 
-      rendering << "#{i + 1}"
-      row.each do |el| # is a piece or an empty cell
-        rendering << (el.nil? ? "  " : "0 ")
+      col_flipped.each_with_index do |el, x| # is a piece or an empty cell
+        rendering << (el.nil? ? "  " : (@board[y_flipped - 1][x]).to_s)
       end
+
       rendering << "\n"
     end
 
@@ -50,7 +53,9 @@ class Board
 
     3.times do |dy|
       (@size / 2).times do |dx|
-        y, x = [start + (dy * sense), (dy % 2 + dx * 2) * sense]
+        y = start + (dy * sense)
+        x = y % 2 + dx * 2
+        # x = [(y % 2)]
         Piece.new(self, [x,y], color)
       end
     end

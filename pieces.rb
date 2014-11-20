@@ -7,13 +7,17 @@ class Piece
 
   def initialize(board, pos, color)
     @board, @pos, @color = board, pos, color
-    @board[pos] = self
 
     @promoted = false
 
     move_diffs = DIFFS.map { |x, y| [x, y * COLORS[@color]] }
     jump_diffs = DIFFS.map { |x, y| [x * 2, y * 2 * COLORS[@color]] }
     @diffs = move_diffs + jump_diffs
+    @board[pos] = self
+  end
+
+  def to_s
+    return (@color == :w ? "O " : "X ")
   end
 
   def perform_slide(diff)
