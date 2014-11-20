@@ -29,14 +29,15 @@ class Board
 
   def render
     rendering = ""
-    @board.each do |row|
+    @board.each_with_index do |row, i|
+      rendering << "#{i + 1}"
       row.each do |el| # is a piece or an empty cell
-        rendering << el.nil? ? " " : "o"
+        rendering << el.nil? ? "  " : "0 "
       end
       rendering << "\n"
     end
 
-    rendering
+    rendering += " 1 2 3 4 5 6 7 8 \n"
   end
 
   private
