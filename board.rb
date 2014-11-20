@@ -1,6 +1,9 @@
 require_relative 'pieces.rb'
+require_relative 'checkers_errors.rb'
+
 
 class Board
+
   COLORS = { w: 1, b: -1 }
 
   attr_accessor :board
