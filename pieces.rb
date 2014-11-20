@@ -12,7 +12,7 @@ class Piece
     @board, @pos, @color = board, pos, color
     @promoted = false
 
-    # Only works for American and International Checkers, probably.
+    # This only works for normal variants of checkers.
     diffs = [[-1,1],[1,1]]
     # So. The way this is going, we want the left move to be on the left,
     # and the right move to be on the right. So we'll reverse the moves if
@@ -26,7 +26,7 @@ class Piece
     @board[pos] = self
   end
 
-  # Inspection
+  # standard functions
   def to_s
     @color == :w ? "O" : "X"
   end
@@ -35,14 +35,53 @@ class Piece
     @pos
   end
 
+  def dup(board)
+    dup_piece = Piece.new(board, @pos.dup, @color)
+    dup_piece.promoted = self.promoted
+  end
 
   # Moving
-  def perform_moves!(move_sequence)
+  # TODO: Just implement four-way movement for pieces (l, r, bl, br)
+  # F*ck moving by co-ords or diffs.
+  def perform_moves(move_sequence)
 
   end
 
-  # TODO: Just implement four-way movement for pieces
-  # F*ck moving by co-ords
+  protected
+  attr_writer :promoted
+
+  private
+
+  def valid_move_seq?(move_sequence)
+    board_dup = @board.dup
+
+
+  # Moving
+  def perform_moves!(move_sequence)
+    case move_sequence.count
+    when 0
+      raise InputError.new('No input provided')
+    when 1
+      next_move = move_sequence.shift
+      if @slide_diffs.include?(next_move)
+        raise InvalidMoveError if perform_slide(next_move)
+        maybe_promote
+      elsif @jump_diffs.include?(next_move)
+        raise InvalidMoveError if perform_jump(next_move)
+        maybe_promote
+      else
+        raise InvalidMoveError
+      end
+
+    else
+      begin
+        raise InvalidMoveError if perform_jump(move_sequence.shift)
+        maybe_promote
+      end until move_sequence.empty?
+    end
+
+  end
+
   def perform_slide(diff)
     end_pos = position_sum(@pos, diff)
     return false unless move_diffs.include?(end_pos)
@@ -50,6 +89,7 @@ class Piece
     @board[@pos], @board[end_pos] = nil, self
 
     @pos = end_pos
+    true
   end
 
   def perform_jump(diff)
@@ -62,25 +102,29 @@ class Piece
     @board[jumped_pos] = nil
 
     @pos = end_pos
+    true
   end
 
-  private
   def position_sum(pos, diff)
     pos.zip(diff).map { |coord1, coord2| coord1 + coord2 }
   end
 
+  # Helpers
   def move_diffs
     moves = []
 
     @slide_diffs.each_with_index do |diff, i|
       trial_move = position_sum(@pos, diff)
+      # Move won't work if it's out of bounds
       next if trial_move.any? { |x| !x.between?(0, @board.size - 1 ) }
 
-      if @board[trial_move].nil?
+      if @board[trial_move].nil? # Empty cell, valid move
         moves << trial_move
-        next
+        next # ... but obviously we can't jump past an empty cell
       end
 
+      # Check to see if the position two in front of you is empty,
+      # and the position before that has an enemy
       trial_jump = position_sum(@pos, @jump_diffs[i])
       moves << trial_jump if @board[trial_jump].nil? &&
             @board[trial_move].color != @color
