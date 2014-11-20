@@ -28,7 +28,15 @@ class Board
   end
 
   def render
-    
+    rendering = ""
+    @board.each do |row|
+      row.each do |el| # is a piece or an empty cell
+        rendering << el.nil? ? " " : "o"
+      end
+      rendering << "\n"
+    end
+
+    rendering
   end
 
   private
