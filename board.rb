@@ -21,6 +21,18 @@ class Board
     COLORS.each_key { |color| populate(color) } unless clean_board == true
   end
 
+  def dup
+    board_dup = Board.new(@size, true)
+
+    @board.each_with_index do |row, x|
+      row.each_with_index do |el, y|
+        board_dup[[y,x]] = el.dup(self) unless el.nil?
+      end
+    end
+
+    board_dup
+  end
+
   def [](pos)
     x, y = pos
     @board[y][x]

@@ -8,9 +8,8 @@ class Piece
 
   attr_reader :pos, :color
 
-  def initialize(board, pos, color)
-    @board, @pos, @color = board, pos, color
-    @promoted = false
+  def initialize(board, pos, color, promoted = false)
+    @board, @pos, @color, @promoted = board, pos, color, promoted
 
     # This only works for normal variants of checkers.
     diffs = [[-1,1],[1,1]]
@@ -36,8 +35,8 @@ class Piece
   end
 
   def dup(board)
-    dup_piece = Piece.new(board, @pos.dup, @color)
-    dup_piece.promoted = self.promoted
+    dup_piece = Piece.new(board, @pos.dup, @color, @promoted)
+    dup_piece
   end
 
   # Moving
@@ -48,13 +47,13 @@ class Piece
   end
 
   protected
-  attr_writer :promoted
+  attr_accessor :promoted
 
   private
 
   def valid_move_seq?(move_sequence)
     board_dup = @board.dup
-
+  end
 
   # Moving
   def perform_moves!(move_sequence)
