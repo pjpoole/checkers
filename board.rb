@@ -1,19 +1,22 @@
+require_relative 'piece.rb'
+
 class Board
   # "white" moves from 0 toward size - 1 (sense +1)
   # "black" moves from size - 1 toward 0 (sense -1)
   # more of this logic is contained in pieces.rb
+  COLORS = { w: 1, b: -1 }
 
   attr_reader :size
 
   def initialize(size = 8, clean_board = false)
-    @size = size
+    @size = size # should be even!
     @board = Array.new(@size) { Array.new(@size) }
 
-    unless clean_board == true do
-      # Populate board with pieces
-      # Note: player's rightmost square is light
-      # => only dark squares are occupied
-      # => Thus: x_x_x_x_ would be a back row
+    # Note: player's rightmost square is light
+    # => only dark squares are occupied
+    # => Thus: x_x_x_x_ would be a back row
+    COLORS.each_key { |color| populate(color) } unless clean_board == true
+
     end
   end
 
@@ -29,7 +32,9 @@ class Board
 
   def render
     rendering = ""
+
     @board.each_with_index do |row, i|
+
       rendering << "#{i + 1}"
       row.each do |el| # is a piece or an empty cell
         rendering << el.nil? ? "  " : "0 "
@@ -41,5 +46,20 @@ class Board
   end
 
   private
+  def populate(color)
+    start -= color == :w ? @size : 1
+    sense  = color == :w ? 1 : -1
 
+    3.times do |dy|
+      (@size / 2).times do |dx|
+        y, x = [start + dy, dy % 2 + dx * 2].map { |el| el * sense }
+        Piece.new(self, [x,y], color)
+      end
+    end
+  end
+end
+
+if $PROGRAM_NAME == __FILE__
+  board = Board.new
+  puts board.render
 end
