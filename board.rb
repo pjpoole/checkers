@@ -26,7 +26,7 @@ class Board
 
     @board.each_with_index do |row, x|
       row.each_with_index do |el, y|
-        board_dup[[y,x]] = el.dup(self) unless el.nil?
+        board_dup[[y,x]] = el.dup(board_dup) unless el.nil?
       end
     end
 

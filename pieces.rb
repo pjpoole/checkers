@@ -36,18 +36,18 @@ class Piece
   end
 
   def dup(board)
-    dup_piece = Piece.new(board, @pos.dup, @color, @promoted)
-    dup_piece
+    Piece.new(board, @pos.dup, @color, @promoted)
   end
 
   # Moving
   # TODO: Just implement four-way movement for pieces (l, r, bl, br)
   # F*ck moving by co-ords or diffs.
   def perform_moves(sym_move_sequence)
-    move_sequence = to_diffs(sym_move_sequence)
+    orig_move_sequence = to_diffs(sym_move_sequence)
+    move_sequence = orig_move_sequence.dup
 
-    if valid_move_sequence?(move_sequence)
-      perform_moves!(move_sequence)
+    if valid_move_seq?(move_sequence)
+      perform_moves!(orig_move_sequence)
     else
       raise InvalidMoveError
     end
@@ -56,20 +56,6 @@ class Piece
   protected
   attr_accessor :promoted
 
-  private
-
-  def valid_move_seq?(move_sequence)
-    board_dup = @board.dup
-
-    begin
-      board_dup.perform_moves!(move_sequence)
-    rescue InvalidMoveError
-      return false
-    end
-
-    true
-  end
-
   # Moving
   def perform_moves!(move_sequence)
     case move_sequence.count
@@ -77,11 +63,12 @@ class Piece
       raise InputError.new('No input provided')
     when 1
       next_move = move_sequence.shift
+
       if @slide_diffs.include?(next_move)
-        raise InvalidMoveError if perform_slide(next_move)
+        raise InvalidMoveError unless perform_slide(next_move)
         maybe_promote
       elsif @jump_diffs.include?(next_move)
-        raise InvalidMoveError if perform_jump(next_move)
+        raise InvalidMoveError unless perform_jump(next_move)
         maybe_promote
       else
         raise InvalidMoveError
@@ -93,7 +80,19 @@ class Piece
         maybe_promote
       end until move_sequence.empty?
     end
+  end
 
+  private
+  def valid_move_seq?(move_sequence)
+    board_dup = @board.dup
+
+    begin
+      board_dup[@pos].perform_moves!(move_sequence)
+    rescue InvalidMoveError
+      return false
+    end
+
+    true
   end
 
   def perform_slide(diff)
@@ -103,6 +102,7 @@ class Piece
     @board[@pos], @board[end_pos] = nil, self
 
     @pos = end_pos
+    puts "end of method"
     true
   end
 
@@ -125,7 +125,7 @@ class Piece
 
   # Helpers
   def to_diffs(sym_move_sequence)
-    sym_move_sequence.map { |sym| MOVES[sym] }
+    sym_move_sequence.map { |sym| @slide_diffs[MOVES[sym]] }
   end
 
   def move_diffs
