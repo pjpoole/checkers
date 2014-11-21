@@ -60,8 +60,16 @@ class Board
     rendering += " 1 2 3 4 5 6 7 8 \n"
   end
 
-  def count_pieces # debug method
-    puts @board.flatten.compact.tap { |x| x.each { |el| p el } }.count
+  def game_over? # debug method
+    piece_count = [0, 0]
+    pieces = @board.flatten.compact
+
+    pieces.each do |piece|
+      idx = piece.color == :w ? 0 : 1
+      piece_count[idx] += 1
+    end
+
+    piece_count.any? { |x| x == 0 }
   end
 
   private

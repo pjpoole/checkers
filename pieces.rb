@@ -28,7 +28,8 @@ class Piece
 
   # standard functions
   def to_s
-    @color == :w ? "O" : "X"
+    str = @color == :w ? "o" : "x"
+    str.upcase if @promoted
   end
 
   def inspect
@@ -95,6 +96,9 @@ class Piece
     true
   end
 
+  def perform_move(diff)
+
+
   def perform_slide(diff)
     end_pos = position_sum(@pos, diff)
     return false unless move_diffs.include?(end_pos)
@@ -102,7 +106,6 @@ class Piece
     @board[@pos], @board[end_pos] = nil, self
 
     @pos = end_pos
-    puts "end of method"
     true
   end
 
