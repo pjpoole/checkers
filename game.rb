@@ -58,9 +58,9 @@ class Game
   def validate_input(coords, color)
     raise InputError.new('Out of bounds') unless
           coords.all? { |x| x.between?(0, @size - 1) }
-    raise InputError.new('Piece doesn\'t belong to player') unless
-          @game[coords].color == color
-    true
+    raise InputError.new('No piece at location') unless
+          !@game[coords].nil?
+    @game[coords].validate_input(color)
   end
 
 end

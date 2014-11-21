@@ -30,6 +30,7 @@ class Piece
   def to_s
     str = @color == :w ? "o" : "x"
     str.upcase if @promoted
+    str
   end
 
   def inspect
@@ -40,17 +41,25 @@ class Piece
     Piece.new(board, @pos.dup, @color, @promoted)
   end
 
+  def validate_input(player_color)
+    raise InputError.new('Piece doesn\'t belong to player') unless
+          @board[@pos].color == player_color
+    raise InputError.new('Piece is blocked in') unless
+          @slide_diffs.map { |diff| position_sum(@pos, diff) }.
+          any? { |pos| @board[pos].nil? || @board[pos].color != @color }
+    true
+  end
+
   # Moving
-  # TODO: Just implement four-way movement for pieces (l, r, bl, br)
+  # TODO: Just implement four-way movement for pieces (:l, :r, :bl, :br)
   # F*ck moving by co-ords or diffs.
   def perform_moves(sym_move_sequence)
-    orig_move_sequence = to_diffs(sym_move_sequence)
-    move_sequence = orig_move_sequence.dup
+    move_sequence = to_indices(sym_move_sequence)
 
     if valid_move_seq?(move_sequence)
-      perform_moves!(orig_move_sequence)
+      perform_moves!(move_sequence)
     else
-      raise InvalidMoveError
+      raise InvalidMoveError.new('Move not valid')
     end
   end
 
@@ -63,21 +72,14 @@ class Piece
     when 0
       raise InputError.new('No input provided')
     when 1
-      next_move = move_sequence.shift
+      idx = move_sequence[0]
 
-      if @slide_diffs.include?(next_move)
-        raise InvalidMoveError unless perform_slide(next_move)
-        maybe_promote
-      elsif @jump_diffs.include?(next_move)
-        raise InvalidMoveError unless perform_jump(next_move)
-        maybe_promote
-      else
-        raise InvalidMoveError
-      end
-
-    else
+      perform_move(@jump_diffs[idx]) unless perform_move(@slide_diffs[idx])
+      maybe_promote
+    when 2
       begin
-        raise InvalidMoveError if perform_jump(move_sequence.shift)
+        idx = move_sequence.shift
+        perform_move(@jump_diffs[idx])
         maybe_promote
       end until move_sequence.empty?
     end
@@ -97,28 +99,25 @@ class Piece
   end
 
   def perform_move(diff)
-
-
-  def perform_slide(diff)
     end_pos = position_sum(@pos, diff)
-    return false unless move_diffs.include?(end_pos)
+    raise InvalidMoveError.new('Destination out of bounds') unless
+          end_pos.all? { |coord| coord.between?(0, @board.size - 1) }
 
-    @board[@pos], @board[end_pos] = nil, self
+    slide = (diff[0]).abs == 1
+
+    near_pos = position_sum(@pos, (diff.map { |x| x / 2 }) ) unless slide
+
+    if slide && @board[end_pos].nil?
+      @board[@pos], @board[end_pos] = nil, self
+    elsif @board[end_pos].nil? && @board[near_pos].color != @color
+      @board[@pos], @board[end_pos] = nil, self
+      @board[near_pos] = nil
+    else
+      return false
+    end
 
     @pos = end_pos
-    true
-  end
 
-  def perform_jump(diff)
-    end_pos = position_sum(@pos, diff)
-    return false unless move_diffs.include?(end_pos)
-
-    jumped_pos = position_sum(@pos, diff.map { |coord| coord / 2 })
-
-    @board[@pos], @board[end_pos] = nil, self
-    @board[jumped_pos] = nil
-
-    @pos = end_pos
     true
   end
 
@@ -127,8 +126,8 @@ class Piece
   end
 
   # Helpers
-  def to_diffs(sym_move_sequence)
-    sym_move_sequence.map { |sym| @slide_diffs[MOVES[sym]] }
+  def to_indices(sym_move_sequence)
+    sym_move_sequence.map { |sym| MOVES[sym] }
   end
 
   def move_diffs
@@ -157,7 +156,7 @@ class Piece
   def maybe_promote
     # don't want the move diffs to grow without bound, so we return
     # early here if we've promoted already.
-    return true if @promoted
+    return true if @promoted == true
 
     # have we reached the end of the board?
     return false unless (@color == :w ? pos[1] == @board.size - 1 : pos[1] == 0)
@@ -166,5 +165,7 @@ class Piece
     # Neat!
     @slide_diffs += @slide_diffs.map { |x, y| [x, y * -1]}
     @jump_diffs  += @jump_diffs.map  { |x, y| [x, y * -1]}
+
+    @promoted = true
   end
 end
